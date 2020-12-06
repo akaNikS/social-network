@@ -13,8 +13,11 @@ class MySql
     private $sth;
     public function __construct(array $params)
     {
-        //todo check params
-        $this->pdo = new \PDO('mysql:host=' . $params['host'] . ';dbname=' . $params['name'], $params['user'], $params['password']);
+        if (isset($params['host']) && isset($params['name']) && isset($params['user']) && isset($params['password'])) {
+            $this->pdo = new \PDO('mysql:host=' . $params['host'] . ';dbname=' . $params['name'], $params['user'], $params['password']);
+        } else {
+            throw new \Exception('Bad mysql config');
+        }
     }
 
     public function save(string $table, array $data)

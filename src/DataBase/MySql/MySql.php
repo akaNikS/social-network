@@ -35,4 +35,12 @@ class MySql
         $this->sth = $this->pdo->prepare($query);
         $this->sth->execute($values);
     }
+
+    public function getArrays(string $table, array $conditions = []): array
+    {
+        $query = "SELECT * FROM `$table` " . ($conditions ? 'WHERE ' . implode(' AND ', array_map(function ($e) {return $e . ' = ?';}, array_keys($conditions))) : '');
+        $this->sth = $this->pdo->prepare($query);
+        $this->sth->execute(array_values($conditions));
+        return $this->sth->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

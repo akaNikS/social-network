@@ -24,14 +24,22 @@ class Auth
 
     public function register(Request $request, Response $response, $args = [])
     {
+        $errors = [];
         if ($request->getMethod() === 'GET') {
             return $this->view->render($response, 'auth/register.phtml');
         }
-        //todo validation
         $password = $request->getParsedBody()['password'];
         $email = $request->getParsedBody()['email'];
-        $this->db->save('users', ['email' => $email, 'password' => md5($password, true)]);
-        #var_dump($request->getParsedBody());
-        return $this->view->render($response, 'auth/register.phtml');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'invalid email';
+        }
+        if (strlen($password) < 8) {
+            $errors['password'] = 'short';
+        }
+        if (empty($errors)) {
+            $this->db->save('users', ['email' => $email, 'password' => md5($password, true)]);
+        }
+        // TODO success registration
+        return $this->view->render($response, 'auth/register.phtml', ['errors' => $errors]);
     }
 }

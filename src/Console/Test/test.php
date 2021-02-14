@@ -14,3 +14,5 @@ for ($i = 0; $i < 5000; $i++) {
 }
 
 $secondLogger = new App\Services\Logger\Logger('second_log');
+
+$secondLogger->warning('Test warning');

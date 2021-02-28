@@ -1,14 +1,14 @@
 <?php
 namespace App\Controllers;
 
+use App\Adapters\ViewAdapter;
 use App\DataBase\MySql\MySql;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Response;
-use Slim\Views\PhpRenderer;
 
 class Profile
 {
-    public function __construct(PhpRenderer $view, MySql $db)
+    public function __construct(ViewAdapter $view, MySql $db)
     {
         $this->view = $view;
         $this->db = $db;
@@ -23,7 +23,7 @@ class Profile
 
         return $this->view->render(
             $response,
-            'private/private.phtml',
+            'private/private.tpl',
             [
                 'name' => $user[0]['name'],
             ]

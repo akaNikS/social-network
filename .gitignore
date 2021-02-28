@@ -26,3 +26,4 @@ extras/documentation
 .idea/
 configs/
 logs/
+templates_c/*

@@ -1,17 +1,17 @@
 <?php
 namespace App\Controllers;
 
+use App\Adapters\ViewAdapter;
 use App\DataBase\MySql\MySql;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
-use Slim\Views\PhpRenderer;
 
 class Auth
 {
     /**
-     * @var PhpRenderer
+     * @var ViewAdapter
      */
     protected $view;
     /**
@@ -24,7 +24,7 @@ class Auth
      */
     protected $logger;
 
-    public function __construct(PhpRenderer $view, MySql $db, LoggerInterface $logger) {
+    public function __construct(ViewAdapter $view, MySql $db, LoggerInterface $logger) {
         $this->view = $view;
         $this->db = $db;
         $this->logger = $logger;
@@ -35,7 +35,7 @@ class Auth
         // todo check auth
         $errors = [];
         if ($request->getMethod() === 'GET') {
-            return $this->view->render($response, 'auth/register.phtml');
+            return $this->view->render($response, 'auth/register.tpl');
         }
         $password = $request->getParsedBody()['password'];
         $email = $request->getParsedBody()['email'];
@@ -57,7 +57,7 @@ class Auth
                 return $response->withStatus(301)->withHeader('Location', 'private');
             }
         }
-        return $this->view->render($response, 'auth/register.phtml', ['errors' => $errors]);
+        return $this->view->render($response, 'auth/register.tpl', ['errors' => $errors]);
     }
 
     public function authorization(Request $request, Response $response, $args = []): ResponseInterface
@@ -65,7 +65,7 @@ class Auth
         $errors = [];
         // TODO check auth
         if ($request->getMethod() === 'GET') {
-            return $this->view->render($response, 'auth/authorization.phtml');
+            return $this->view->render($response, 'auth/authorization.tpl');
         }
         $password = $request->getParsedBody()['password'];
         $email = $request->getParsedBody()['email'];
@@ -76,14 +76,14 @@ class Auth
             $errors['password'] = 'short';
         }
         if ($errors) {
-            return $this->view->render($response, 'auth/authorization.phtml', ['errors' => $errors]);
+            return $this->view->render($response, 'auth/authorization.tpl', ['errors' => $errors]);
         }
         $user = $this->db->getArrays('app_users', ['email' => $email])[0] ?? null;
         if ($user === null) {
-            return $this->view->render($response, 'auth/authorization.phtml', ['errors' => ['email' => 'User not found']]);
+            return $this->view->render($response, 'auth/authorization.tpl', ['errors' => ['email' => 'User not found']]);
         }
         if (md5($password, true) !== $user['password']) {
-            return $this->view->render($response, 'auth/authorization.phtml', ['errors' => ['password' => 'Invalid password']]);
+            return $this->view->render($response, 'auth/authorization.tpl', ['errors' => ['password' => 'Invalid password']]);
         }
         $_SESSION['user_id'] = $user['id'];
         // todo page private (template, controller, route)

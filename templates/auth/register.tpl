@@ -3,14 +3,14 @@
 <form method="post">
     <p>email:</p>
     <input name="email">
-    <?php if (!empty($errors['email'])) : ?>
+    {if (!empty($errors['email']))}
         <p style="color: red; font-size: 10px;">Неккоректный email</p>
-    <?php endif; ?>
+    {/if}
     <p>Пароль</p>
     <input type="password" name="password">
-    <?php if (!empty($errors['password'])) : ?>
+    {if (!empty($errors['password']))}
         <p style="color: red; font-size: 10px;">пароль должен содержать минимум 8 знаков</p>
-    <?php endif; ?>
+    {/if}
     <p></p>
     <input type="submit">
 </form>

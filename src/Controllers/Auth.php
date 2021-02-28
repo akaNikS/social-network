@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\DataBase\MySql\MySql;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
@@ -45,14 +46,21 @@ class Auth
             $errors['password'] = 'short';
         }
         if (empty($errors)) {
+            // todo input user name
             $this->db->save('app_users', ['email' => $email, 'password' => md5($password, true), 'name' => '123']);
+            $user = $this->db->getArrays('app_users', ['email' => $email]);
+            if (empty($user[0]['id'])) {
+                $errors['email'] = 'service unavailable';
+            } else {
+                $_SESSION['user_id'] = $user[0]['id'];
+                $this->logger->info("User [$email] successfully registered");
+                return $response->withStatus(301)->withHeader('Location', 'private');
+            }
         }
-        $this->logger->info("User [$email] successfully registered");
-        // TODO success registration
         return $this->view->render($response, 'auth/register.phtml', ['errors' => $errors]);
     }
 
-    public function authorization(Request $request, Response $response, $args = [])
+    public function authorization(Request $request, Response $response, $args = []): ResponseInterface
     {
         $errors = [];
         // TODO check auth
@@ -77,8 +85,9 @@ class Auth
         if (md5($password, true) !== $user['password']) {
             return $this->view->render($response, 'auth/authorization.phtml', ['errors' => ['password' => 'Invalid password']]);
         }
-        $_SESSION['userId'] = $user['id'];
+        $_SESSION['user_id'] = $user['id'];
         // todo page private (template, controller, route)
-        header("Location: private");
+        #header("Location: private");
+        return $response->withStatus(301)->withHeader('Location', 'private');
     }
 }

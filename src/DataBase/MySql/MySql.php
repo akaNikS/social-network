@@ -20,6 +20,11 @@ class MySql
         }
     }
 
+    public function getPDO(): \PDO
+    {
+        return $this->pdo;
+    }
+
     public function save(string $table, array $data)
     {
         $fields = [];

@@ -18,17 +18,22 @@ final class AppUsersTable extends AbstractMigration
      */
     public function change(): void
     {
-        $query = 'CREATE TABLE
-        (
-            id int auto_increment,
-            email varchar(255) null,
-            name varchar(128) null,
-            surname varchar(128) null,
-            middle_name varchar(128) null,
-            password varchar(255) null,
-            constraint app_users_pk
-                primary key (id)
-        )';
+        $query = 'create table app_users
+            (
+                id int(13) unsigned auto_increment,
+                email varchar(255) not null,
+                name varchar(128) not null,
+                surname varchar(128) not null,
+                middle_name varchar(128) null,
+                password binary(16) not null,
+                constraint app_users_pk
+                    primary key (id)
+            );';
+
+        $queryUniqIndex = 'create unique index app_users_email_uindex on app_users (email);';
+
         $this->query($query);
+        $this->query($queryUniqIndex);
+
     }
 }

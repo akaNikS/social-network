@@ -32,28 +32,36 @@ class Auth
 
     public function register(Request $request, Response $response, $args = [])
     {
-        // todo check auth
-        $errors = [];
+        if (isset($_SESSION['user_id'])) {
+            return $response->withStatus(301)->withHeader('Location', 'private');
+        }
+
         if ($request->getMethod() === 'GET') {
             return $this->view->render($response, 'auth/register.tpl');
         }
-        $password = $request->getParsedBody()['password'];
-        $email = $request->getParsedBody()['email'];
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'invalid email';
-        }
-        if (strlen($password) < 8) {
-            $errors['password'] = 'short';
-        }
+
+        $regForm = $request->getParsedBody();
+        $verifiedData = $this->checkRegForm($regForm);
+        $errors = $verifiedData['errors'];
+
         if (empty($errors)) {
-            // todo input user name
-            $this->db->save('app_users', ['email' => $email, 'password' => md5($password, true), 'name' => '123']);
-            $user = $this->db->getArrays('app_users', ['email' => $email]);
+            $this->db->save(
+                'app_users',
+                [
+                    'email' => $verifiedData['email'],
+                    'password' => md5($verifiedData['password'], true),
+                    'name' => $verifiedData['name'],
+                    'surname' => $verifiedData['surname'],
+                    'middle_name' => $verifiedData['middle_name']
+                ]
+            );
+
+            $user = $this->db->getArrays('app_users', ['email' => $verifiedData['email']]);
             if (empty($user[0]['id'])) {
                 $errors['email'] = 'service unavailable';
             } else {
                 $_SESSION['user_id'] = $user[0]['id'];
-                $this->logger->info("User [$email] successfully registered");
+                $this->logger->info('User ['. $verifiedData['email'] .'] successfully registered');
                 return $response->withStatus(301)->withHeader('Location', 'private');
             }
         }
@@ -89,5 +97,36 @@ class Auth
         // todo page private (template, controller, route)
         #header("Location: private");
         return $response->withStatus(301)->withHeader('Location', 'private');
+    }
+
+    /**
+     * @param array $regFormData
+     * @return array
+     */
+    private function checkRegForm(array $regFormData) : array
+    {
+        $errors = [];
+        $verifiedData = [];
+        $verifiedData['password'] = $regFormData['password'];
+        $verifiedData['email'] = $regFormData['email'];
+        $verifiedData['name'] = $regFormData['name'];
+        $verifiedData['surname'] = $regFormData['surname'];
+        $verifiedData['middle_name'] = $regFormData['middle_name'] ?? null;
+
+        if (!filter_var($verifiedData['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'invalid email';
+        }
+        if (strlen($verifiedData['password']) < 8) {
+            $errors['password'] = 'short';
+        }
+        if (strlen($verifiedData['name']) === 0) {
+            $errors['name'] = 'empty';
+        }
+        if (strlen($verifiedData['surname']) === 0) {
+            $errors['surname'] = 'empty';
+        }
+        $verifiedData['errors'] = $errors;
+
+        return $verifiedData;
     }
 }

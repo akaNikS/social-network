@@ -2,8 +2,8 @@
 
 $container = require __DIR__ . '/src/bootstrap.php';
 
-/** @var App\DataBase\MySql\MySql $mySql */
-$mySql = $container->get(\App\DataBase\MySql\MySql::class);
+/** @var App\Services\DataBase\MySql\MySql $mySql */
+$mySql = $container->get(\App\Services\DataBase\MySql\MySql::class);
 
 return
 [

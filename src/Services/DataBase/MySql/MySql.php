@@ -1,5 +1,5 @@
 <?php
-namespace App\DataBase\MySql;
+namespace App\Services\DataBase\MySql;
 
 class MySql
 {

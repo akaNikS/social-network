@@ -3,12 +3,12 @@
     <p>email:</p>
     <input name="email">
     {if (!empty($errors['email']))}
-        <p style="color: red; font-size: 10px;">Неккоректный email</p>
+        <p style="color: red; font-size: 10px;">{$errors['email']}</p>
     {/if}
     <p>Пароль</p>
     <input type="password" name="password">
     {if (!empty($errors['password']))}
-        <p style="color: red; font-size: 10px;">пароль должен содержать минимум 8 знаков</p>
+        <p style="color: red; font-size: 10px;">{$errors['password']}</p>
     {/if}
     <p></p>
     <input type="submit">

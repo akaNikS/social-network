@@ -2,7 +2,7 @@
 namespace App\Controllers;
 
 use App\Adapters\ViewAdapter;
-use App\DataBase\MySql\MySql;
+use App\Services\DataBase\MySql\MySql;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Response;
 

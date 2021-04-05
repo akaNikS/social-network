@@ -4,6 +4,7 @@ namespace App\Controllers;
 use App\Adapters\ViewAdapter;
 use App\Services\Crypto\Crypto;
 use App\Services\DataBase\MySql\MySql;
+use App\Services\User\UserService;
 use App\Services\User\Validators\UserValidator;
 use Particle\Validator\Validator;
 use Psr\Http\Message\ResponseInterface;
@@ -42,15 +43,27 @@ class Auth
      */
     protected $userValidator;
 
-    public function __construct(ViewAdapter $view, MySql $db, LoggerInterface $logger, Crypto $crypto, Validator $validator, UserValidator $userValidator) {
+    /**
+     * @var UserService
+     */
+    protected $user;
+
+    public function __construct(ViewAdapter $view, MySql $db, LoggerInterface $logger, Crypto $crypto, Validator $validator, UserValidator $userValidator, UserService $user) {
         $this->view = $view;
         $this->db = $db;
         $this->logger = $logger;
         $this->crypto = $crypto;
         $this->validator = $validator;
         $this->userValidator = $userValidator;
+        $this->user = $user;
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return ResponseInterface|\Slim\Psr7\Message|Response
+     */
     public function register(Request $request, Response $response, $args = [])
     {
         if (isset($_SESSION['user_id'])) {
@@ -79,17 +92,25 @@ class Auth
             ]
         );
 
-        $user = $this->db->getArrays('app_users', ['email' => $verifiedData['email']]);
-        if (empty($user[0]['id'])) {
+        $user = $this->user->getUserByEmail($verifiedData['email']);
+        if ($user === null) {
+            // todo something =)
+
             $errors['email'] = 'service unavailable';
             return $this->view->render($response, 'auth/register.tpl', ['errors' => $errors]);
         }
 
-        $_SESSION['user_id'] = $user[0]['id'];
+        $_SESSION['user_id'] = $user['id'];
         $this->logger->info('User ['. $verifiedData['email'] .'] successfully registered');
         return $response->withStatus(301)->withHeader('Location', 'private');
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return ResponseInterface
+     */
     public function authorization(Request $request, Response $response, $args = []): ResponseInterface
     {
         if (isset($_SESSION['user_id'])) {
@@ -107,7 +128,7 @@ class Auth
             return $this->view->render($response, 'auth/authorization.tpl', ['errors' => $errors]);
         }
 
-        $user = $this->db->getArrays('app_users', ['email' => $body['email']])[0] ?? null;
+        $user = $this->user->getUserByEmail($body['email']);
         if ($user === null) {
             return $this->view->render($response, 'auth/authorization.tpl', ['errors' => ['email' => 'User not found']]);
         }

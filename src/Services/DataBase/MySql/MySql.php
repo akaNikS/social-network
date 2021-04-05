@@ -41,6 +41,12 @@ class MySql
         $this->sth->execute($values);
     }
 
+    /**
+     * @param string $table
+     * @param array $conditions
+     * @return array
+     * Array of values from DB
+     */
     public function getArrays(string $table, array $conditions = []): array
     {
         $query = "SELECT * FROM `$table` " . ($conditions ? 'WHERE ' . implode(' AND ', array_map(function ($e) {return $e . ' = ?';}, array_keys($conditions))) : '');

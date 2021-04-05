@@ -14,6 +14,10 @@ class Profile
         $this->db = $db;
     }
 
+    /**
+     * @param Response $response
+     * @return ResponseInterface
+     */
     public function profile(Response $response): ResponseInterface
     {
         $user = $this->db->getArrays('app_users', ['id' => $_SESSION['user_id'] ?? 0]);

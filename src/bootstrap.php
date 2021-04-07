@@ -1,4 +1,6 @@
 <?php
+
+use App\Services\DataBase\MySql\MySql;
 use Psr\Container\ContainerInterface;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -7,11 +9,21 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $builder = new DI\ContainerBuilder();
 $builder->addDefinitions(__DIR__ .  '/../configs/mysql.php');
+$builder->addDefinitions(__DIR__ . '/../configs/crypto.php');
 $builder->addDefinitions([
-    \Slim\Views\PhpRenderer::class => new \Slim\Views\PhpRenderer('../templates/'),
-    \App\DataBase\MySql\MySql::class => function (ContainerInterface $c) {
-        return new \App\DataBase\MySql\MySql((array) $c->get('mysql'));
+    \Smarty::class => function() {
+        $smarty = new \Smarty();
+        $smarty->setTemplateDir(__DIR__ . '/../templates');
+        $smarty->setCompileDir(__DIR__ . '/../templates_c');
+        return $smarty;
     },
-    \Psr\Log\LoggerInterface::class => new App\Services\Logger\Logger('log')
+    MySql::class => function (ContainerInterface $c) {
+        return new MySql((array) $c->get('mysql'));
+    },
+    \Psr\Log\LoggerInterface::class => new App\Services\Logger\Logger('log'),
+    App\Services\Crypto\Crypto::class => function (ContainerInterface $c) {
+        return new App\Services\Crypto\Crypto((string) $c->get('salt'));
+    },
 ]);
+
 return $builder->build();

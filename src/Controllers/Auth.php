@@ -1,84 +1,145 @@
 <?php
 namespace App\Controllers;
 
-use App\DataBase\MySql\MySql;
+use App\Adapters\ViewAdapter;
+use App\Services\Crypto\Crypto;
+use App\Services\DataBase\MySql\MySql;
+use App\Services\User\UserService;
+use App\Services\User\Validators\UserValidator;
+use Particle\Validator\Validator;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Slim\Psr7\Message;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
-use Slim\Views\PhpRenderer;
 
 class Auth
 {
     /**
-     * @var PhpRenderer
+     * @var ViewAdapter
      */
     protected $view;
-    /**
-     * @var MySql
-     */
-    protected $db;
 
     /**
      * @var LoggerInterface
      */
     protected $logger;
 
-    public function __construct(PhpRenderer $view, MySql $db, LoggerInterface $logger) {
+    /**
+     * @var Crypto
+     */
+    protected $crypto;
+
+    /**
+     * @var UserValidator
+     */
+    protected $userValidator;
+
+    /**
+     * @var UserService
+     */
+    protected $user;
+
+    public function __construct(ViewAdapter $view, LoggerInterface $logger, Crypto $crypto, UserValidator $userValidator, UserService $user) {
         $this->view = $view;
-        $this->db = $db;
         $this->logger = $logger;
+        $this->crypto = $crypto;
+        $this->userValidator = $userValidator;
+        $this->user = $user;
     }
 
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return ResponseInterface|Message|Response
+     */
     public function register(Request $request, Response $response, $args = [])
     {
-        // todo check auth
-        $errors = [];
+        if (isset($_SESSION['user_id'])) {
+            return $response->withStatus(301)->withHeader('Location', 'private');
+        }
+
         if ($request->getMethod() === 'GET') {
-            return $this->view->render($response, 'auth/register.phtml');
+            return $this->view->render($response, 'auth/register.tpl');
         }
-        $password = $request->getParsedBody()['password'];
-        $email = $request->getParsedBody()['email'];
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'invalid email';
+
+        $verifiedData = $this->invalidateForm($request->getParsedBody());
+        $validateResult = $this->userValidator->validate($verifiedData, UserValidator::REG_CONTEXT);
+        if (!$validateResult->isValid()) {
+            $errors = $this->userValidator->adapter($validateResult->getFailures());
+            return $this->view->render($response, 'auth/register.tpl', ['errors' => $errors]);
         }
-        if (strlen($password) < 8) {
-            $errors['password'] = 'short';
+
+        $this->user->saveUser(
+            $verifiedData['email'],
+            $this->crypto->preparedPassword($verifiedData['password']),
+            $verifiedData['name'],
+            $verifiedData['surname'],
+            $verifiedData['middle_name']
+        );
+
+        $user = $this->user->getUserByEmail($verifiedData['email']);
+        if ($user === null) {
+            // todo something =)
+
+            $errors['email'] = 'service unavailable';
+            return $this->view->render($response, 'auth/register.tpl', ['errors' => $errors]);
         }
-        if (empty($errors)) {
-            $this->db->save('app_users', ['email' => $email, 'password' => md5($password, true), 'name' => '123']);
-        }
-        $this->logger->info("User [$email] successfully registered");
-        // TODO success registration
-        return $this->view->render($response, 'auth/register.phtml', ['errors' => $errors]);
+
+        $_SESSION['user_id'] = $user['id'];
+        $this->logger->info('User ['. $verifiedData['email'] .'] successfully registered');
+        return $response->withStatus(301)->withHeader('Location', 'private');
     }
 
-    public function authorization(Request $request, Response $response, $args = [])
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     * @return ResponseInterface
+     */
+    public function authorization(Request $request, Response $response, $args = []): ResponseInterface
     {
-        $errors = [];
-        // TODO check auth
+        if (isset($_SESSION['user_id'])) {
+            return $response->withStatus(301)->withHeader('Location', 'private');
+        }
+
         if ($request->getMethod() === 'GET') {
-            return $this->view->render($response, 'auth/authorization.phtml');
+            return $this->view->render($response, 'auth/authorization.tpl');
         }
-        $password = $request->getParsedBody()['password'];
-        $email = $request->getParsedBody()['email'];
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors['email'] = 'invalid email';
+
+        $body = $request->getParsedBody();
+        $validateResult = $this->userValidator->validate($body, UserValidator::AUTH_CONTEXT);
+        if (!$validateResult->isValid()) {
+            $errors = $this->userValidator->adapter($validateResult->getFailures());
+            return $this->view->render($response, 'auth/authorization.tpl', ['errors' => $errors]);
         }
-        if (strlen($password) < 8) {
-            $errors['password'] = 'short';
-        }
-        if ($errors) {
-            return $this->view->render($response, 'auth/authorization.phtml', ['errors' => $errors]);
-        }
-        $user = $this->db->getArrays('app_users', ['email' => $email])[0] ?? null;
+
+        $user = $this->user->getUserByEmail($body['email']);
         if ($user === null) {
-            return $this->view->render($response, 'auth/authorization.phtml', ['errors' => ['email' => 'User not found']]);
+            return $this->view->render($response, 'auth/authorization.tpl', ['errors' => ['email' => 'User not found']]);
         }
-        if (md5($password, true) !== $user['password']) {
-            return $this->view->render($response, 'auth/authorization.phtml', ['errors' => ['password' => 'Invalid password']]);
+        if ($this->crypto->preparedPassword($body['password']) !== $user['password']) {
+            return $this->view->render($response, 'auth/authorization.tpl', ['errors' => ['password' => 'Invalid password']]);
         }
-        $_SESSION['userId'] = $user['id'];
+        $_SESSION['user_id'] = $user['id'];
         // todo page private (template, controller, route)
-        header("Location: private");
+        #header("Location: private");
+        return $response->withStatus(301)->withHeader('Location', 'private');
+    }
+
+    /**
+     * @param array $regFormData
+     * @return array
+     */
+    private function invalidateForm(array $regFormData): array
+    {
+        $verifiedData['email'] = htmlspecialchars($regFormData['email'] ?? '');
+        $verifiedData['password'] = htmlspecialchars($regFormData['password'] ?? '');
+        $verifiedData['name'] = htmlspecialchars($regFormData['name'] ?? '');
+        $verifiedData['surname'] = htmlspecialchars($regFormData['surname'] ?? '');
+        $verifiedData['middle_name'] = htmlspecialchars($regFormData['middle_name'] ?? '');
+
+        return $verifiedData;
     }
 }

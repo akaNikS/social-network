@@ -2,6 +2,7 @@
 namespace App\Routing;
 
 use App\Controllers\Auth;
+use App\Controllers\Profile;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
@@ -17,6 +18,8 @@ class Routing
 
         $app->get('/auth', [Auth::class, 'authorization']);
         $app->post('/auth', [Auth::class, 'authorization']);
+
+        $app->get('/private', [Profile::class, 'profile']);
 
         return $app;
     }

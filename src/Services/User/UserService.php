@@ -26,4 +26,26 @@ class UserService
     {
         return $this->db->getArrays(self::USER_TABLE, ['email' => $email])[0] ?? null;
     }
+
+    /**
+     * @param $email
+     * @param $password
+     * @param $name
+     * @param $surname
+     * @param $middleName
+     * saves the user to the database
+     */
+    public function saveUser($email, $password, $name, $surname, $middleName): void
+    {
+        $this->db->save(
+            self::USER_TABLE,
+            [
+                'email' => $email,
+                'password' => $password,
+                'name' => $name,
+                'surname' => $surname,
+                'middle_name' => $middleName
+            ]
+        );
+    }
 }

@@ -26,9 +26,4 @@ $builder->addDefinitions([
     },
 ]);
 
-/*$builder->addDefinitions([
-    \App\Services\User\UserService::class => function (ContainerInterface $c) {
-        return new \App\Services\User\UserService($c->get(MySql::class));
-    },
-]);*/
 return $builder->build();

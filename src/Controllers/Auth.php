@@ -9,6 +9,7 @@ use App\Services\User\Validators\UserValidator;
 use Particle\Validator\Validator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Slim\Psr7\Message;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 
@@ -18,10 +19,6 @@ class Auth
      * @var ViewAdapter
      */
     protected $view;
-    /**
-     * @var MySql
-     */
-    protected $db;
 
     /**
      * @var LoggerInterface
@@ -34,11 +31,6 @@ class Auth
     protected $crypto;
 
     /**
-     * @var Validator
-     */
-    protected $validator;
-
-    /**
      * @var UserValidator
      */
     protected $userValidator;
@@ -48,12 +40,10 @@ class Auth
      */
     protected $user;
 
-    public function __construct(ViewAdapter $view, MySql $db, LoggerInterface $logger, Crypto $crypto, Validator $validator, UserValidator $userValidator, UserService $user) {
+    public function __construct(ViewAdapter $view, LoggerInterface $logger, Crypto $crypto, UserValidator $userValidator, UserService $user) {
         $this->view = $view;
-        $this->db = $db;
         $this->logger = $logger;
         $this->crypto = $crypto;
-        $this->validator = $validator;
         $this->userValidator = $userValidator;
         $this->user = $user;
     }
@@ -62,7 +52,7 @@ class Auth
      * @param Request $request
      * @param Response $response
      * @param array $args
-     * @return ResponseInterface|\Slim\Psr7\Message|Response
+     * @return ResponseInterface|Message|Response
      */
     public function register(Request $request, Response $response, $args = [])
     {
@@ -81,15 +71,12 @@ class Auth
             return $this->view->render($response, 'auth/register.tpl', ['errors' => $errors]);
         }
 
-        $this->db->save(
-            'app_users',
-            [
-                'email' => $verifiedData['email'],
-                'password' => $this->crypto->preparedPassword($verifiedData['password']),
-                'name' => $verifiedData['name'],
-                'surname' => $verifiedData['surname'],
-                'middle_name' => $verifiedData['middle_name']
-            ]
+        $this->user->saveUser(
+            $verifiedData['email'],
+            $this->crypto->preparedPassword($verifiedData['password']),
+            $verifiedData['name'],
+            $verifiedData['surname'],
+            $verifiedData['middle_name']
         );
 
         $user = $this->user->getUserByEmail($verifiedData['email']);

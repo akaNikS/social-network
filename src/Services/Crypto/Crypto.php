@@ -13,6 +13,11 @@ class Crypto
         $this->salt = $salt;
     }
 
+    /**
+     * Adds salt to the password
+     * @param string $password
+     * @return string
+     */
     public function preparedPassword(string $password): string
     {
         return md5($password . $this->salt, true);

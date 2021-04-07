@@ -7,10 +7,12 @@ class MySql
      * @var \PDO
      */
     private $pdo;
+
     /**
      * @var \PDOStatement
      */
     private $sth;
+
     public function __construct(array $params)
     {
         if (isset($params['host']) && isset($params['name']) && isset($params['user']) && isset($params['password'])) {
@@ -25,7 +27,11 @@ class MySql
         return $this->pdo;
     }
 
-    public function save(string $table, array $data)
+    /**
+     * @param string $table
+     * @param array $data
+     */
+    public function save(string $table, array $data): void
     {
         $fields = [];
         $values = [];

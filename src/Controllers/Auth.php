@@ -3,10 +3,8 @@ namespace App\Controllers;
 
 use App\Adapters\ViewAdapter;
 use App\Services\Crypto\Crypto;
-use App\Services\DataBase\MySql\MySql;
 use App\Services\User\UserService;
 use App\Services\User\Validators\UserValidator;
-use Particle\Validator\Validator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Psr7\Message;

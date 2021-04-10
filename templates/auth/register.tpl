@@ -9,7 +9,7 @@
 <body>
 <div class="login">
     <div class="inner_container">
-        <h1>Регистрация</h1>
+        <h1>РЕГИСТРАЦИЯ</h1>
         <form class="form_column" method="post">
             <div class="form_item">
                 <input name="name" placeholder="Имя">
@@ -36,7 +36,7 @@
                 {/if}
             </div>
             <div class="form_item">
-                <input type="password" name="password" placeholder="Password">
+                <input type="password" name="password" placeholder="Пароль">
                 {if (!empty($errors['password']))}
                     <p class="form_item__error">{$errors['password']}</p>
                 {/if}

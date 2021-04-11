@@ -11,13 +11,13 @@
         <h1>АВТОРИЗАЦИЯ</h1>
         <form method="post" class="form_column">
             <div class="form_item">
-                <input type="email" name="email" placeholder="E-mail" id="email">
+                <input onclick="hideError(this)" type="email" name="email" placeholder="E-mail" id="email">
                 {if (!empty($errors['email']))}
                     <p class="form_item__error">{$errors['email']}</p>
                 {/if}
             </div>
             <div class="form_item">
-                <input type="password" name="password" placeholder="Пароль">
+                <input onclick="hideError(this)" type="password" name="password" placeholder="Пароль">
                 {if (!empty($errors['password']))}
                     <p class="form_item__error">{$errors['password']}</p>
                 {/if}
@@ -34,5 +34,7 @@
         </form>
     </div>
 </div>
+
+<script src="/assets/main.js"></script>
 </body>
 </html>

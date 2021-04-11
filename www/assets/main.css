@@ -87,9 +87,9 @@ input {
     background-color: #045ecd !important;
     border: 2px solid #045ecd !important;
     color: white;
-    width: 100px !important;
+    width: 150px !important;
 }
 
-.align_right {
-    align-items: flex-end;
+.align_center {
+    align-items: center;
 }

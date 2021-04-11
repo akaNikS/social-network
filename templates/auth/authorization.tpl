@@ -1,34 +1,38 @@
 <html lang="ru">
 <head>
     <link rel="stylesheet" type="text/css" href="/assets/main.css">
+    <link rel="stylesheet" type="text/css" href="/assets/auth/authorization.css">
     <title>Авторизация</title>
 </head>
 
 <body>
-<section>
-    <div class="container__auth">
-        <div class="container__title">
-            <h1>АВТОРИЗАЦИЯ</h1>
-        </div>
-        <div class="container__auth__form">
-            <form method="post" class="form_auth">
-                <div class="container__auth_input">
-                    <input type="email" name="email" placeholder="  E-mail" id="email">
-                    {if (!empty($errors['email']))}
-                        <p style="color: red; font-size: 10px;">{$errors['email']}</p>
-                    {/if}
-                    <input type="password" name="password" placeholder="  Password">
-                    {if (!empty($errors['password']))}
-                        <p style="color: red; font-size: 10px;">{$errors['password']}</p>
-                    {/if}
+<div class="login">
+    <div class="inner_container">
+        <h1>АВТОРИЗАЦИЯ</h1>
+        <form method="post" class="form_column">
+            <div class="form_item">
+                <input type="email" name="email" placeholder="E-mail" id="email">
+                {if (!empty($errors['email']))}
+                    <p class="form_item__error">{$errors['email']}</p>
+                {/if}
+            </div>
+            <div class="form_item">
+                <input type="password" name="password" placeholder="Пароль">
+                {if (!empty($errors['password']))}
+                    <p class="form_item__error">{$errors['password']}</p>
+                {/if}
+            </div>
+            <div class="form_horizontal_spacer_before"></div>
+            <div class="form_item direction_row">
+                <div class="form_item_elements">
+                    <input id="remember" type="checkbox" name="remember">
+                    <label for="remember">Запомнить</label>
                 </div>
-                <div class="container__auth_submit">
-                    <label id="test"><input type="checkbox" name="remember"> Запомнить</label>
-                    <input type="submit" value="Вход" id="auth_button">
-                </div>
-            </form>
-        </div>
+                <input type="submit" value="Вход" class="button_submit">
+            </div>
+            <div class="form_horizontal_spacer"></div>
+        </form>
     </div>
-</section>
+</div>
 </body>
 </html>

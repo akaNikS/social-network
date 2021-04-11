@@ -1,36 +1,54 @@
+<html lang="ru">
 
-<h1>Регистрация</h1>
-<form method="post">
+<head>
+    <link rel="stylesheet" type="text/css" href="/assets/main.css">
+    <link rel="stylesheet" type="text/css" href="/assets/auth/registration.css">
+    <title>Регистрация</title>
+</head>
 
-    <p>Имя:</p>
-    <input name="name" placeholder="Имя*">
-    {if (!empty($errors['name']))}
-        <p style="color: red; font-size: 10px;">{$errors['name']}</p>
-    {/if}
+<body>
+<div class="login">
+    <div class="inner_container">
+        <h1>РЕГИСТРАЦИЯ</h1>
+        <form class="form_column" method="post">
+            <div class="form_item">
+                <input name="name" placeholder="Имя">
+                {if (!empty($errors['name']))}
+                    <p class="form_item__error">{$errors['name']}</p>
+                {/if}
+            </div>
+            <div class="form_item">
+                <input name="surname" placeholder="Фамилия">
+                {if (!empty($errors['surname']))}
+                    <p class="form_item__error">{$errors['surname']}</p>
+                {/if}
+            </div>
+            <div class="form_item">
+                <input name="middle_name" placeholder="Отчество">
+                {if (!empty($errors['middle_name']))}
+                    <p class="form_item__error">{$errors['middle_name']}</p>
+                {/if}
+            </div>
+            <div class="form_item">
+                <input type="email" name="email" placeholder="E-mail">
+                {if (!empty($errors['email']))}
+                    <p class="form_item__error">{$errors['email']}</p>
+                {/if}
+            </div>
+            <div class="form_item">
+                <input type="password" name="password" placeholder="Пароль">
+                {if (!empty($errors['password']))}
+                    <p class="form_item__error">{$errors['password']}</p>
+                {/if}
+            </div>
+            <div class="form_horizontal_spacer_before"></div>
+            <div class="form_item align_right">
+                <input class="button_submit" type="submit">
+            </div>
+            <div class="form_horizontal_spacer"></div>
+        </form>
+    </div>
+</div>
 
-    <p>Фамилия:</p>
-    <input name="surname" placeholder="Фамилия*">
-    {if (!empty($errors['surname']))}
-        <p style="color: red; font-size: 10px;">{$errors['surname']}</p>
-    {/if}
-
-    <p>Отчество:</p>
-    <input name="middle_name" placeholder="Отчество">
-    {if (!empty($errors['middle_name']))}
-        <p style="color: red; font-size: 10px;">{$errors['middle_name']}</p>
-    {/if}
-
-    <p>email:</p>
-    <input name="email">
-    {if (!empty($errors['email']))}
-        <p style="color: red; font-size: 10px;">{$errors['email']}</p>
-    {/if}
-
-    <p>Пароль:</p>
-    <input type="password" name="password">
-    {if (!empty($errors['password']))}
-        <p style="color: red; font-size: 10px;">{$errors['password']}</p>
-    {/if}
-    <p></p>
-    <input type="submit">
-</form>
+</body>
+</html>

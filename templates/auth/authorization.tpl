@@ -24,7 +24,10 @@
             </div>
             <div class="form_horizontal_spacer_before"></div>
             <div class="form_item direction_row">
-                <label><input type="checkbox" name="remember"> Запомнить</label>
+                <div class="form_item_elements">
+                    <input id="remember" type="checkbox" name="remember">
+                    <label for="remember">Запомнить</label>
+                </div>
                 <input type="submit" value="Вход" class="button_submit">
             </div>
             <div class="form_horizontal_spacer"></div>

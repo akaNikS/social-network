@@ -1,1 +1,1 @@
-# social-network
+# Training backend project

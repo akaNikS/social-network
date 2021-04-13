@@ -93,3 +93,23 @@ input {
 .align_center {
     align-items: center;
 }
+
+.align_space_between {
+    justify-content: space-between;
+}
+
+.align_base_line {
+    align-items: baseline;
+}
+
+.form_item_element {
+    display: flex;
+}
+
+.form_item_element input {
+    width: auto;
+}
+
+.form_item_element label {
+    margin: 0 0 0 5px;
+}

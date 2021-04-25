@@ -2,16 +2,27 @@
 namespace App\Controllers;
 
 use App\Adapters\ViewAdapter;
-use App\Services\DataBase\MySql\MySql;
+use App\Services\User\UserService;
+use Bitrix\Im\User;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Response;
 
 class Profile
 {
-    public function __construct(ViewAdapter $view, MySql $db)
+    /**
+     * @var ViewAdapter
+     */
+    protected ViewAdapter $view;
+
+    /**
+     * @var UserService
+     */
+    protected UserService $user;
+
+    public function __construct(ViewAdapter $view, UserService $user)
     {
         $this->view = $view;
-        $this->db = $db;
+        $this->user = $user;
     }
 
     /**
@@ -20,8 +31,8 @@ class Profile
      */
     public function profile(Response $response): ResponseInterface
     {
-        $user = $this->db->getArrays('app_users', ['id' => $_SESSION['user_id'] ?? 0]);
-        if (empty($user[0]['id'])) {
+        $user = $this->user->getUserById($_SESSION['user_id']);
+        if (empty($user['id'])) {
            return $response->withStatus(301)->withHeader('Location', 'auth');
         }
 
@@ -29,7 +40,9 @@ class Profile
             $response,
             'private/private.tpl',
             [
-                'name' => $user[0]['name'],
+                'name' => $user['name'],
+                'fullName' => $user['surname'] . ' ' . $user['name'] . ' ' . $user['middle_name'] ?? '',
+                'email' => $user['email']
             ]
         );
     }

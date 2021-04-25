@@ -28,6 +28,15 @@ class UserService
     }
 
     /**
+     * @param $id
+     * @return array|null
+     */
+    public function getUserById($id): ?array
+    {
+        return $this->db->getArrays(self::USER_TABLE, ['id' => $id])[0] ?? null;
+    }
+
+    /**
      * @param $email
      * @param $password
      * @param $name
